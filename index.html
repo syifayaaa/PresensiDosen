@@ -15,20 +15,12 @@
       height: 100vh;
       border: none;
       display: block;
-      border-radius: 0 !important;
-    }
-    img {
-      border-radius: 0 !important;
     }
   </style>
 </head>
 <body>
 
-<iframe 
-  id="tallyframe"
-  src=""
-  loading="lazy">
-</iframe>
+<iframe id="tallyframe" src="" loading="lazy"></iframe>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -47,27 +39,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const reverseURL = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`;
 
-    // TIMEOUT: kalau 3 detik tidak ada response, pakai fallback
     const timeout = new Promise((resolve) =>
       setTimeout(() => resolve(null), 3000)
     );
 
     Promise.race([
-      fetch(reverseURL, {
-        headers: { "User-Agent": "STIU-DQ-Presensi/1.0" }
-      }).then(r => r.json()).catch(() => null),
+      fetch(reverseURL, { headers: { "User-Agent": "STIU-DQ-Presensi/1.0" } })
+        .then(r => r.json()).catch(() => null),
       timeout
     ])
     .then(data => {
-      let alamat;
+      const alamat = (data && data.display_name)
+                     ? data.display_name
+                     : `${lat},${lng}`;
 
-      if (data && data.display_name) {
-        alamat = data.display_name;
-      } else {
-        alamat = `${lat},${lng}`;
-      }
-
-      const embedURL = `https://tally.so/r/Ekq5oq?location=${encodeURIComponent(alamat)}&t=${Date.now()}`;
+      const embedURL =
+        `https://tally.so/r/Ekq5oq` +
+        `?borderRadius=0` +
+        `&alignLeft=1&hideTitle=1&transparentBackground=1` +
+        `&location=${encodeURIComponent(alamat)}` +
+        `&t=${Date.now()}`;
 
       document.getElementById("tallyframe").src = embedURL;
     });
